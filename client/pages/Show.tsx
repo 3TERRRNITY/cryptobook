@@ -1,9 +1,7 @@
 import React, { useRef, useState } from "react";
 import Layout from "../components/Layout";
 import styled from "@emotion/styled";
-import { ethers } from "ethers";
-import provider from "../provider";
-import contactFactory from "../contactFactory";
+import getContactByAddress from "../utils/getContactByAddress";
 
 type Props = {};
 
@@ -62,144 +60,30 @@ const Show = (props: Props) => {
     transition: all 0.2s;
   `;
 
+  const [telegram, setTelegram] = useState<string>();
+  const [discord, setDiscord] = useState<string>();
+  const [description, setDescription] = useState<string>();
+
   const addressRef = useRef<HTMLInputElement>();
   const [errorMessage, setErrorMessage] = useState<string>();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     const address = addressRef.current?.value;
-    console.log("address: ", address);
     setErrorMessage(null);
-
+    setTelegram("");
+    setDiscord("");
+    setDescription("");
     if (!address) {
       setErrorMessage("Please enter an address.");
       return;
     }
 
     try {
-      const contactAddress = await contactFactory.ownerToContact(address);
-      console.log("contactAddress: ", contactAddress);
-      const contactAbi = [
-        {
-          inputs: [
-            {
-              internalType: "address",
-              name: "_owner",
-              type: "address",
-            },
-            {
-              internalType: "string",
-              name: "_telegram",
-              type: "string",
-            },
-            {
-              internalType: "string",
-              name: "_discord",
-              type: "string",
-            },
-          ],
-          stateMutability: "nonpayable",
-          type: "constructor",
-        },
-        {
-          inputs: [],
-          name: "description",
-          outputs: [
-            {
-              internalType: "string",
-              name: "",
-              type: "string",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "discord",
-          outputs: [
-            {
-              internalType: "string",
-              name: "",
-              type: "string",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "owner",
-          outputs: [
-            {
-              internalType: "address",
-              name: "",
-              type: "address",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "string",
-              name: "_description",
-              type: "string",
-            },
-          ],
-          name: "setDescription",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "string",
-              name: "_discord",
-              type: "string",
-            },
-          ],
-          name: "setDiscord",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "string",
-              name: "_telegram",
-              type: "string",
-            },
-          ],
-          name: "setTelegram",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "telegram",
-          outputs: [
-            {
-              internalType: "string",
-              name: "",
-              type: "string",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-      ];
-      const contact = new ethers.Contract(contactAddress, contactAbi, provider);
-      const telegram = await contact.telegram();
-      console.log("telegram: ", telegram);
-      const discord = await contact.discord();
-      console.log("discord: ", discord);
-      const description = await contact.description();
-      console.log("description: ", description);
+      const contact = await getContactByAddress(address);
+      setTelegram(contact.telegram);
+      setDiscord(contact.discord);
+      setDescription(contact.description);
     } catch (error) {
       console.error(error);
       setErrorMessage(error.message);
@@ -214,6 +98,9 @@ const Show = (props: Props) => {
         <SumbitButton type="submit">Search</SumbitButton>
         {errorMessage && <Error>{errorMessage}</Error>}
       </Form>
+      {telegram && <h2>Telegram: @{telegram}</h2>}
+      {discord && <h2>Discord: @{discord}</h2>}
+      {description && <h2>Descrtiption: {description}</h2>}
     </Layout>
   );
 };

@@ -13,4 +13,5 @@ eth/artifacts
 
 #client
 client/node_modules
+client/.next
 
