@@ -1,7 +1,9 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import Layout from "../components/Layout";
 import styled from "@emotion/styled";
-import { Label, SubmitButton } from "../styles/Show";
+import { Error, Label, SubmitButton } from "../styles/Show";
+import provider from "../provider";
+import contactFactory from "../contactFactory";
 
 type Props = {};
 
@@ -30,14 +32,38 @@ const Add = (props: Props) => {
     background-color: #b0b0b0;
     color: white;
   `);
+  const AddSubmitButton = styled(SubmitButton)`
+    grid-column: 1/3;
+    margin: 0 auto;
+  `;
+  const Success = styled(Error)`
+    background-color: #359835;
+  `;
   const telegramRef = useRef<HTMLInputElement>();
   const discordRef = useRef<HTMLInputElement>();
+  const [errorMessage, setErrorMessage] = useState<string>();
+  const [successMessage, setSuccessMessage] = useState<string>();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrorMessage("");
+    setSuccessMessage("");
     const newTelegram = telegramRef.current?.value;
     const newDiscord = discordRef.current?.value;
-    console.log(newTelegram, newDiscord);
+
+    const signer = await provider.getSigner();
+    const contactFactoryWithSigner = contactFactory.connect(signer);
+
+    try {
+      const response = await contactFactoryWithSigner[
+        "createContact(string, string)"
+      ](newTelegram, newDiscord);
+      console.log("response: ", response);
+      setSuccessMessage(`Transaction hash: ${response.hash}`);
+    } catch (error) {
+      console.error(error);
+      setErrorMessage(error.message);
+    }
   };
 
   return (
@@ -57,8 +83,14 @@ const Add = (props: Props) => {
             ref={discordRef}
           />
         </InputGroup>
-        <SubmitButton type="submit">Save contact</SubmitButton>
+        <AddSubmitButton type="submit">Save contact</AddSubmitButton>
       </InputForm>
+      {errorMessage && (
+        <Error style={{ wordBreak: "break-word" }}>{errorMessage}</Error>
+      )}
+      {successMessage && (
+        <Success style={{ wordBreak: "break-word" }}>{successMessage}</Success>
+      )}
     </Layout>
   );
 };
