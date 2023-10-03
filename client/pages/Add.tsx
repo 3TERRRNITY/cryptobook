@@ -39,8 +39,12 @@ const Add = (props: Props) => {
   const Success = styled(Error)`
     background-color: #359835;
   `;
+  const DescriptionInputGroup = styled(InputGroup)`
+    grid-column: 1/3;
+  `;
   const telegramRef = useRef<HTMLInputElement>();
   const discordRef = useRef<HTMLInputElement>();
+  const descriptionRef = useRef<HTMLInputElement>();
   const [errorMessage, setErrorMessage] = useState<string>();
   const [successMessage, setSuccessMessage] = useState<string>();
 
@@ -50,14 +54,27 @@ const Add = (props: Props) => {
     setSuccessMessage("");
     const newTelegram = telegramRef.current?.value;
     const newDiscord = discordRef.current?.value;
+    const newDescription = descriptionRef.current?.value;
 
     const signer = await provider.getSigner();
     const contactFactoryWithSigner = contactFactory.connect(signer);
 
     try {
-      const response = await contactFactoryWithSigner[
-        "createContact(string, string)"
-      ](newTelegram, newDiscord);
+      let response;
+      if (!newTelegram || !newDescription) {
+        setErrorMessage(
+          "You need to fill the telegram area! (discord and description are optional)"
+        );
+      } else if (!newDiscord && !newDescription) {
+        response = await contactFactoryWithSigner["createContact(string)"](
+          newTelegram
+        );
+      } else {
+        response = await contactFactoryWithSigner[
+          "createContact(string, string)"
+        ](newTelegram, newDiscord);
+      }
+
       console.log("response: ", response);
       setSuccessMessage(`Transaction hash: ${response.hash}`);
     } catch (error) {
@@ -70,7 +87,7 @@ const Add = (props: Props) => {
     <Layout>
       <InputForm onSubmit={handleSubmit}>
         <InputGroup>
-          <Label>Telegram</Label>
+          <Label>Telegram</Label>``
           <InputArea
             placeholder="Put down you telegram username"
             ref={telegramRef}
@@ -83,6 +100,10 @@ const Add = (props: Props) => {
             ref={discordRef}
           />
         </InputGroup>
+        <DescriptionInputGroup>
+          <Label>Description</Label>
+          <InputArea placeholder="Something about you" ref={descriptionRef} />
+        </DescriptionInputGroup>
         <AddSubmitButton type="submit">Save contact</AddSubmitButton>
       </InputForm>
       {errorMessage && (
