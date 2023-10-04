@@ -17,6 +17,9 @@ const Header = () => {
       text-decoration: none;
       color: #161515;
     }
+    @media (max-width: 520px) {
+      font-size: medium;
+    }
   `;
   const HeaderItems = styled.div`
     display: flex;
@@ -32,6 +35,9 @@ const Header = () => {
     & > a {
       text-decoration: none;
       color: #161515;
+    }
+    @media (max-width: 520px) {
+      font-size: small;
     }
   `;
 

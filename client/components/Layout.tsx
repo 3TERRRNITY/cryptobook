@@ -11,6 +11,11 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   const LayoutContainer = styled.div``;
   const Container = styled.div`
     margin: 0 64px;
+    min-width: 320px;
+
+    @media (max-width: 520px) {
+      margin: 0 12px;
+    }
   `;
   return (
     <LayoutContainer>

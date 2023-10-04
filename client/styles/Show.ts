@@ -10,6 +10,10 @@ export const Form = styled.form`
   border-radius: 15px;
   padding: 40px;
   row-gap: 20px;
+  @media (max-width: 520px) {
+    width: 70%;
+    min-width: 200px;
+  }
 `;
 export const SubmitButton = styled.button`
   padding: 20px;

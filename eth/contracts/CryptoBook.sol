@@ -9,13 +9,13 @@ contract ContactFactory {
         _;
     }
 
-    function createContact( string memory _telegram, string memory _discord, string memory _description) public onlyNewRecords {
-        Contact contact = new Contact(msg.sender, _telegram, _discord, _description);
+    function createContact( string memory _telegram, string memory _discord) public onlyNewRecords {
+        Contact contact = new Contact(msg.sender, _telegram, _discord);
         ownerToContact[msg.sender] = address(contact);
     }
 
     function createContact( string memory _telegram) public onlyNewRecords {
-        Contact contact = new Contact(msg.sender, _telegram, "", "");
+        Contact contact = new Contact(msg.sender, _telegram, "");
         ownerToContact[msg.sender] = address(contact);
     }
 }
@@ -26,11 +26,11 @@ contract Contact {
     string public discord;
     string public description;
 
-    constructor (address _owner, string memory _telegram, string memory _discord, string memory _description) {
+    constructor (address _owner, string memory _telegram, string memory _discord) {
         owner = _owner;
         telegram = _telegram;
         discord = _discord;
-        description = _description;
+        
     }
 
     modifier onlyOwner() {
